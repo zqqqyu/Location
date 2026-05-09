@@ -261,12 +261,10 @@
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            Prevailing HDR video reconstruction methods predominantly adopt the alignment-fusion paradigm, which is easily degraded by motion misalignment and often produces temporal flicker.
-In this work, we revisit HDR video reconstruction from a <strong>Fusion-Propagation perspective</strong>, reformulating the task as robust sequence-level information propagation instead of fragile frame-wise alignment. 
-Grounded in a Maximum a Posteriori (MAP) formulation, we decompose the problem into two cascaded learnable stages. 
-The first stage, <strong>Joint Spatio-Temporal Fusion</strong>, performs motion-aware feature aggregation through a Temporal Prior Aggregator (TPA) and a Content-Faithful Fusion (CFF) module, operating on a stable mid-exposure reference backbone. 
-The second stage, <strong>Recurrent Temporal Refinement</strong>, acts as a recurrent solver that propagates corrective signals across the entire sequence using Bidirectional Context Aggregation (BCA) and Long-Range Temporal Modeling (LTM) to enhance temporal consistency and suppress flicker.
-Extensive experiments on benchmark datasets demonstrate that our approach achieves superior reconstruction quality, temporal stability, and maintains a competitive accuracy-latency trade-off with recent state-of-the-art methods.
+            Prevailing High Dynamic Range (HDR) video reconstruction methods are fundamentally trapped in a fragile alignment-and-fusion paradigm. While explicit spatial alignment can successfully recover fine details in controlled environments, it becomes a severe bottleneck in unconstrained dynamic scenes. By forcing rigid alignment across unpredictable motions and varying exposures, these methods inevitably translate registration errors into severe ghosting artifacts and temporal flickering.
+In this paper, we rethink this conventional prerequisite. Recognizing that explicit alignment is inherently vulnerable to real-world complexities, we propose LoCAtion, a Long-time Collaborative Attention framework that reformulates HDR video generation from a fragile spatial warping task into a robust, alignment-free collaborative feature routing problem.
+Guided by this new formulation, our architecture explicitly decouples the highly entangled reconstruction task. Rather than struggling to rigidly warp neighboring frames, we anchor the scene on a continuous medium-exposure backbone and utilize collaborative attention to dynamically harvest and inject reliable irradiance cues from unaligned exposures. 
+Furthermore, we introduce a learned global sequence solver. By leveraging bidirectional context and long-range temporal modeling, it propagates corrective signals and structural features across the entire sequence, inherently enforcing whole video coherence and eliminating jitter. Extensive experiments demonstrate that LoCAtion achieves state-of-the-art visual quality and temporal stability, offering a highly competitive balance between accuracy and computational efficiency.
           </p>
         </div>
       </div>
@@ -284,14 +282,12 @@ Extensive experiments on benchmark datasets demonstrate that our approach achiev
       </p>
       <ul style="list-style: none; padding-left: 0;">
         <li style="margin-bottom: 0.75rem; padding-left: 1rem; text-indent: -1rem;">
-          <strong>(a) Probabilistic MAP-driven optimization</strong>:
-          We reinterpret HDR video reconstruction from the probabilistic perspective of a Maximum a Posteriori estimation.
-          We introduce a novel fusion-propagation framework based on a fixed-reference setup, which fundamentally decouples motion handling from exposure fusion and recasts the task as a robust HDR information propagation problem.
+          <strong>(a) A new Formulation for Video HDR</strong>:
+          We introduce a fundamental theoretical shift by completely abandoning the fragile spatial alignment process. Instead, we formulate HDR video generation as an alignment-free, long-time collaborative feature routing problem, establishing a robust new foundation for unconstrained dynamic scenes.
         </li>
         <li style="margin-bottom: 0.75rem; padding-left: 1rem; text-indent: -1rem;">
-          <strong>(b) Propagation-Enhanced Two-Stage Reconstruction Network </strong>:
-          We design a two-stage architecture that explicitly mirrors the spatial fusion and temporal regularization subproblems.
-          Our Network comprises a Joint Spatio-Temporal Fusion stage using Temporal Prior Aggregator (TPA) and a rejection mechanism to eliminate ghosting, followed by a Recurrent Temporal Refinement stage using Bidirectional Context Aggregation (BCA) and Long-Range Temporal Modeling (LTM) to ensure consistency.
+          <strong>(b) An Effective Two-Stage Architecture </strong>:
+          We design a highly effective two-stage network. It features a Collaborative Feature Attention stage to reliably extract local dynamic range without motion artifacts, and a Global Sequence Consistency stage to strictly enforce temporal smoothness and eliminate visual flicker.
         </li>
       </ul>
     </div>
@@ -392,9 +388,9 @@ Extensive experiments on benchmark datasets demonstrate that our approach achiev
 
 <section class="section">
   <div class="container is-max-desktop">
-    <h2 class="title is-3">Comparison Results on public Real Captured Testset</h2>
+    <h2 class="title is-3">Comparison Results on Real HDR Videos</h2>
     <p style="padding-bottom: 1rem;">
-      Comparison of our method with state-of-the-art video HDR reconstruction approaches on Real Captured Testset. Click the scene buttons to switch between different scenes.
+      Comparison of our method with state-of-the-art video HDR reconstruction approaches on Real HDR videos. Click the scene buttons to switch between different scenes.
     </p>
     
     <!-- Comparison Scene Selection Buttons -->
