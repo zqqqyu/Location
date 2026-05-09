@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Rethinking HDR Video Reconstruction: A Fusion-Propagation Framework.">
+  <meta name="keywords" content="HDR-Video">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rethinking HDR Video Reconstruction: A Fusion-Propagation Framework</title>
+
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+
+  <!-- Custom styles for video demo -->
+  <style>
+    .scene-btn {
+      margin: 0.25rem;
+      transition: all 0.3s ease;
+      min-width: 140px;
+    }
+    
+    .scene-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .scene-btn.is-primary {
+      font-weight: 600;
+    }
+    
+    .field.is-grouped.is-grouped-centered {
+      flex-wrap: wrap;
+    }
+    
+    .video-controls-section {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    
+    .video-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+      margin-top: 2rem;
+    }
+    
+    .video-row {
+      display: grid;
+      gap: 1.5rem;
+      justify-items: center;
+    }
+    
+    .video-row.four-videos {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .video-row.two-videos {
+      grid-template-columns: repeat(2, 1fr);
+      width: 100%;
+      margin: 0 auto;
+    }
+    
+    .video-row.three-videos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  justify-items: center; 
+}
+
+    @media (max-width: 1200px) {
+      .video-row.four-videos {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .video-row.four-videos,
+      .video-row.two-videos {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .video-item {
+      text-align: center;
+    }
+    
+    .video-item video {
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .video-row.two-videos .video-item video {
+      max-width: 500px;
+    }
+    
+    .comparison-video-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+      margin-top: 2rem;
+    }
+    
+    .comparison-video-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      justify-items: center;
+    }
+    
+    @media (max-width: 1024px) {
+      .comparison-video-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .comparison-video-row {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+    }
+    
+    .fixview-video-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    
+    .fixview-video-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 3rem;
+      justify-items: center;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .fixview-video-row .video-item video {
+      max-width: 450px;
+    }
+    
+    @media (max-width: 768px) {
+      .fixview-video-row {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+      
+      .fixview-video-row .video-item video {
+        max-width: 400px;
+      }
+    }
+    
+    .fixtime-video-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    
+    .fixtime-video-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 3rem;
+      justify-items: center;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .fixtime-video-row .video-item video {
+      max-width: 450px;
+    }
+    
+    @media (max-width: 768px) {
+      .fixtime-video-row {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+      
+      .fixtime-video-row .video-item video {
+        max-width: 400px;
+      }
+    }
+    
+    .video-item video:hover {
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      transform: translateY(-2px);
+    }
+    
+    .video-item h4 {
+      color: #363636;
+      font-weight: 600;
+    }
+    
+    .video-item p {
+      color: #757575;
+      font-style: italic;
+    }
+
+
+    .comparison-video-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;      
+}
+
+
+.comparison-video-row {
+  display: flex;
+  justify-content: center; 
+  gap: 1.5rem;              
+  margin-bottom: 1.5rem;
+}
+
+.video-item {
+  text-align: center;
+}
+
+.video-item video {
+  max-width: 100%;
+  height: auto;
+}
+
+  </style>
+
+  <!-- Image Comparison Slider -->
+
+
+  <link rel="icon" href="./static/images/favicon.ico">
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+</head>
+<body>
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">
+            <span>Rethinking HDR Video Reconstruction: A Fusion-Propagation Framework</span>
+          </h1>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Prevailing HDR video reconstruction methods predominantly adopt the alignment-fusion paradigm, which is easily degraded by motion misalignment and often produces temporal flicker.
+In this work, we revisit HDR video reconstruction from a <strong>Fusion-Propagation perspective</strong>, reformulating the task as robust sequence-level information propagation instead of fragile frame-wise alignment. 
+Grounded in a Maximum a Posteriori (MAP) formulation, we decompose the problem into two cascaded learnable stages. 
+The first stage, <strong>Joint Spatio-Temporal Fusion</strong>, performs motion-aware feature aggregation through a Temporal Prior Aggregator (TPA) and a Content-Faithful Fusion (CFF) module, operating on a stable mid-exposure reference backbone. 
+The second stage, <strong>Recurrent Temporal Refinement</strong>, acts as a recurrent solver that propagates corrective signals across the entire sequence using Bidirectional Context Aggregation (BCA) and Long-Range Temporal Modeling (LTM) to enhance temporal consistency and suppress flicker.
+Extensive experiments on benchmark datasets demonstrate that our approach achieves superior reconstruction quality, temporal stability, and maintains a competitive accuracy-latency trade-off with recent state-of-the-art methods.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">Method Overview</h2>
+    <div class="is-centered has-text-centered"><img src="static/images/framework2.png" alt="SVG mit img laden" width="100%"></div>
+    <div class="content has-text-justified" style="padding-top: 1rem;">
+      <p style="margin-bottom: 0.5rem; font-weight: 500;">
+        The overview of our framework:
+      </p>
+      <ul style="list-style: none; padding-left: 0;">
+        <li style="margin-bottom: 0.75rem; padding-left: 1rem; text-indent: -1rem;">
+          <strong>(a) Probabilistic MAP-driven optimization</strong>:
+          We reinterpret HDR video reconstruction from the probabilistic perspective of a Maximum a Posteriori estimation.
+          We introduce a novel fusion-propagation framework based on a fixed-reference setup, which fundamentally decouples motion handling from exposure fusion and recasts the task as a robust HDR information propagation problem.
+        </li>
+        <li style="margin-bottom: 0.75rem; padding-left: 1rem; text-indent: -1rem;">
+          <strong>(b) Propagation-Enhanced Two-Stage Reconstruction Network </strong>:
+          We design a two-stage architecture that explicitly mirrors the spatial fusion and temporal regularization subproblems.
+          Our Network comprises a Joint Spatio-Temporal Fusion stage using Temporal Prior Aggregator (TPA) and a rejection mechanism to eliminate ghosting, followed by a Recurrent Temporal Refinement stage using Bidirectional Context Aggregation (BCA) and Long-Range Temporal Modeling (LTM) to ensure consistency.
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">Demo Videos</h2>
+    <p style="padding-bottom: 1rem;">
+      We provide demo videos for our proposed method, including the reference input, feature maps and our final results. Click the scene buttons to switch between scenes. All four video types are displayed simultaneously.
+    </p>
+    
+    <!-- Scene Selection Buttons -->
+    <div class="has-text-centered" style="margin-bottom: 2rem;">
+      <div class="video-controls-section">
+        <h4 class="title is-6" style="margin-bottom: 0.5rem;">Select Scene:</h4>
+        <div class="field is-grouped is-grouped-centered">
+          <div class="control">
+            <button class="button is-primary scene-btn" data-scene="Tree" onclick="switchScene('Tree')">
+              <span>Tree</span>
+            </button>
+          </div>
+          <div class="control">
+            <button class="button scene-btn" data-scene="Wall" onclick="switchScene('Wall')">
+              <span>Wall</span>
+            </button>
+          </div>
+          <div class="control">
+            <button class="button scene-btn" data-scene="Walk" onclick="switchScene('Walk')">
+              <span>Walk</span>
+            </button>
+          </div>
+          <div class="control">
+            <button class="button scene-btn" data-scene="Night" onclick="switchScene('Night')">
+              <span>Night</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video Display Grid -->
+    <div class="video-grid">
+      <!-- First Row: 4 videos -->
+      <div class="video-row three-videos">
+        <!-- Input Video with Prior Track -->
+        <div class="video-item">
+          <h4 class="title is-6" style="margin-bottom: 1rem;">Features output by the TPA in the low-exposure branch</h4>
+          <video id="video-ll" autoplay controls muted loop playsinline>
+            <source id="source-ll" src="./static/demo_videos/Tree/ll.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
+        <!-- Features Video -->
+        <div class="video-item">
+          <h4 class="title is-6" style="margin-bottom: 1rem;">Features output by the TPA in the high-exposure branch.</h4>
+          <video id="video-hh" autoplay controls muted loop playsinline>
+            <source id="source-hh" src="./static/demo_videos/Tree/hh.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
+
+        <!-- Features Video -->
+        <div class="video-item">
+          <h4 class="title is-6" style="margin-bottom: 1rem;">Features after fusing low-, mid-, and high-exposure inputs.</h4>
+          <video id="video-ff" autoplay controls muted loop playsinline>
+            <source id="source-ff" src="./static/demo_videos/Tree/ff.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
+
+
+
+      <div class="video-row two-videos">
+        <div class="video-item">
+          <h4 class="title is-6" style="margin-bottom: 1rem;">Input reference frame sequence</h4>
+          <video id="video-in" autoplay controls muted loop playsinline>
+            <source id="source-in" src="./static/demo_videos/Tree/in.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
+        <div class="video-item">
+          <h4 class="title is-6" style="margin-bottom: 1rem;">Our results</h4>
+          <video id="video-out" autoplay controls muted loop playsinline>
+            <source id="source-out" src="./static/demo_videos/Tree/out.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">Comparison Results on public Real Captured Testset</h2>
+    <p style="padding-bottom: 1rem;">
+      Comparison of our method with state-of-the-art video HDR reconstruction approaches on Real Captured Testset. Click the scene buttons to switch between different scenes.
+    </p>
+    
+    <!-- Comparison Scene Selection Buttons -->
+    <div class="has-text-centered" style="margin-bottom: 2rem;">
+      <div class="video-controls-section">
+        <h4 class="title is-6" style="margin-bottom: 0.5rem;">Select Scene:</h4>
+        <div class="field is-grouped is-grouped-centered">
+          <div class="control">
+            <button class="button scene-btn" data-scene="Laboratory" onclick="switchComparisonScene('Laboratory')">
+              <span>Laboratory</span>
+            </button>
+          </div>
+          <div class="control">
+            <button class="button scene-btn" data-scene="Streetlight" onclick="switchComparisonScene('Streetlight')">
+              <span>Streetlight</span>
+            </button>
+          </div>
+          <div class="control">
+            <button class="button scene-btn" data-scene="Walk" onclick="switchComparisonScene('Walk')">
+              <span>Walk</span>
+            </button>
+          </div> 
+          <div class="control">
+            <button class="button scene-btn" data-scene="Wall" onclick="switchComparisonScene('Wall')">
+              <span>Wall</span>
+            </button>
+          </div>                   
+          <div class="control">
+            <button class="button scene-btn" data-scene="Students_2" onclick="switchComparisonScene('Students_2')">
+              <span>Students_2</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+<!-- Comparison Video Display Grid -->
+<div class="comparison-video-grid">
+  <!-- First Row: 2 videos -->
+  <div class="comparison-video-row">
+    <!-- DeepHDRVideo -->
+    <div class="video-item">
+      <h4 class="title is-6" style="margin-bottom: 1rem;">DeepHDRVideo</h4>
+      <video id="comparison-video-DeepHDRVideo" autoplay controls muted loop playsinline>
+        <source id="comparison-source-DeepHDRVideo" src="./static/comparison_videos/realdataset/Laboratory/DeepHDRVideo.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+
+    <!-- LANHDR -->
+    <div class="video-item">
+      <h4 class="title is-6" style="margin-bottom: 1rem;">LANHDR</h4>
+      <video id="comparison-video-LANHDR" autoplay controls muted loop playsinline>
+        <source id="comparison-source-LANHDR" src="./static/comparison_videos/realdataset/Laboratory/LANHDR.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </div>
+
+  <!-- Second Row: 2 videos -->
+  <div class="comparison-video-row">
+    <!-- HDRFlow -->
+    <div class="video-item">
+      <h4 class="title is-6" style="margin-bottom: 1rem;">HDRFlow</h4>
+      <video id="comparison-video-HDRFlow" autoplay controls muted loop playsinline>
+        <source id="comparison-source-HDRFlow" src="./static/comparison_videos/realdataset/Laboratory/HDRFlow.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+      </video>
+    </div>
+
+    <!-- Ours -->
+    <div class="video-item">
+      <h4 class="title is-6" style="margin-bottom: 1rem;">Ours</h4>
+      <video id="comparison-video-Ours" autoplay controls muted loop playsinline>
+        <source id="comparison-source-Ours" src="./static/comparison_videos/realdataset/Laboratory/Ours.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">Our Self Captured Real World Results:</h2>
+    <p style="padding-bottom: 1rem;">
+      We present real-world results by using an iPhone/ a Camera to capture a set of mid-exposure sequences along with corresponding low/high-exposure pairs. Click the scene buttons to switch between different scenes.
+    </p>
+    
+    <!-- Self Captured Real World Scene Selection Buttons -->
+    <div class="has-text-centered" style="margin-bottom: 2rem;">
+      <div class="video-controls-section">
+        <h4 class="title is-6" style="margin-bottom: 0.5rem;">Select Scene:</h4>
+        <div class="field is-grouped is-grouped-centered">
+          <div class="control">
+            <button class="button scene-btn" data-scene="CameraCaptured" onclick="switchFixTimeScene('CameraCaptured')">
+              <span>CameraCaptured</span>
+            </button>
+          </div>
+          <div class="control">
+            <button class="button scene-btn" data-scene="CameraCaptured2" onclick="switchFixTimeScene('CameraCaptured2')">
+              <span>CameraCaptured2</span>
+            </button>
+          </div> 
+          <div class="control">
+            <button class="button scene-btn" data-scene="IphoneCaptured" onclick="switchFixTimeScene('IphoneCaptured')">
+              <span>IphoneCaptured</span>
+            </button>
+          </div>                   
+        </div>
+      </div>
+    </div>
+
+    <div class="fixtime-video-grid">
+      <div class="fixtime-video-row">
+        <!-- Input -->
+        <div class="video-item">
+          <h4 class="title is-6" style="margin-bottom: 1rem;">Input</h4>
+          <video id="fixtime-video-in" autoplay controls muted loop playsinline>
+            <source id="fixtime-source-in" src="./static/comparison_videos/ourcaptured/CameraCaptured/in.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
+        <!-- Ours -->
+        <div class="video-item">
+          <h4 class="title is-6" style="margin-bottom: 1rem;">Ours results</h4>
+          <video id="fixtime-video-out" autoplay controls muted loop playsinline>
+            <source id="fixtime-source-out" src="./static/comparison_videos/ourcaptured/CameraCaptured/out.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
+
+        
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// Current state
+let currentScene = 'Tree';
+
+// Scene names mapping
+const sceneNames = {
+  'Tree': 'Tree Scene',
+  'Walk': 'Walk Scene',
+  'Wall': 'Wall Scene',
+  'Night': 'Night Scene'
+};
+
+// Video types and their corresponding IDs
+const videoMappings = [
+  { file: 'ff', id: 'ff' },
+  { file: 'll', id: 'll' },
+  { file: 'hh', id: 'hh' },
+  { file: 'in', id: 'in' },
+  { file: 'out', id: 'out' }
+];
+
+// Update all videos for the current scene
+function updateAllVideos() {
+  videoMappings.forEach(mapping => {
+    const videoPath = `./static/demo_videos/${currentScene}/${mapping.file}.mp4`;
+    const videoElement = document.getElementById(`video-${mapping.id}`);
+    const videoSource = document.getElementById(`source-${mapping.id}`);
+    
+    if (videoSource && videoElement) {
+      videoSource.src = videoPath;
+      videoElement.load(); // Reload the video with new source
+    }
+  });
+}
+
+// Switch scene function
+function switchScene(sceneName) {
+  if (!sceneNames[sceneName]) return;
+  
+  currentScene = sceneName;
+  updateAllVideos();
+  
+  // Update scene button states - only for demo videos section
+  const sceneButtons = document.querySelectorAll('.scene-btn[data-scene]');
+  sceneButtons.forEach(btn => {
+    if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes('switchScene')) {
+      if (btn.getAttribute('data-scene') === sceneName) {
+        btn.classList.add('is-primary');
+        btn.classList.remove('is-light');
+      } else {
+        btn.classList.remove('is-primary');
+        btn.classList.add('is-light');
+      }
+    }
+  });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Set initial button states
+  const sceneButtons = document.querySelectorAll('.scene-btn');
+  sceneButtons.forEach(btn => {
+    if (btn.getAttribute('data-scene') !== 'CameraCaptured') {
+      btn.classList.add('is-light');
+    }
+  });
+  
+  // Set initial comparison button states
+  const comparisonSceneButtons = document.querySelectorAll('.scene-btn[data-scene]');
+  comparisonSceneButtons.forEach(btn => {
+    if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes('switchComparisonScene')) {
+      if (btn.getAttribute('data-scene') === 'Cleaning') {
+        btn.classList.add('is-primary');
+        btn.classList.remove('is-light');
+      } else {
+        btn.classList.add('is-light');
+        btn.classList.remove('is-primary');
+      }
+    }
+  });
+  
+  // Set initial button states
+  const fixviewSceneButtons = document.querySelectorAll('.scene-btn[data-scene]');
+  fixviewSceneButtons.forEach(btn => {
+    if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes('switchFixViewScene')) {
+      if (btn.getAttribute('data-scene') === 'Cars') {
+        btn.classList.add('is-primary');
+        btn.classList.remove('is-light');
+      } else {
+        btn.classList.add('is-light');
+        btn.classList.remove('is-primary');
+      }
+    }
+  });
+  
+  // Set initial fix-time button states
+  const fixtimeSceneButtons = document.querySelectorAll('.scene-btn[data-scene]');
+  fixtimeSceneButtons.forEach(btn => {
+    if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes('switchFixTimeScene')) {
+      if (btn.getAttribute('data-scene') === 'CheckingEmail') {
+        btn.classList.add('is-primary');
+        btn.classList.remove('is-light');
+      } else {
+        btn.classList.add('is-light');
+        btn.classList.remove('is-primary');
+      }
+    }
+  });
+  
+  // Load initial videos
+  updateAllVideos();
+  updateAllComparisonVideos();
+  updateAllFixTimeVideos();
+});
+
+
+
+
+let currentFixTimeScene = 'CameraCaptured';
+
+
+const fixTimeSceneNames = {
+  'IphoneCaptured': 'Iphone Captured Scene',
+  'CameraCaptured': 'Camera Captured Scene',
+  'CameraCaptured2': 'Camera Captured2 Scene'
+};
+
+
+const fixTimeVideoMappings = [
+  { file: 'in', id: 'in' },
+  { file: 'out', id: 'out' }
+];
+
+
+function updateAllFixTimeVideos() {
+  fixTimeVideoMappings.forEach(mapping => {
+    const videoPath = `./static/comparison_videos/ourcaptured/${currentFixTimeScene}/${mapping.file}.mp4`;
+    const videoElement = document.getElementById(`fixtime-video-${mapping.id}`);
+    const videoSource = document.getElementById(`fixtime-source-${mapping.id}`);
+    
+    if (videoSource && videoElement) {
+      videoSource.src = videoPath;
+      videoElement.load(); 
+    }
+  });
+}
+
+
+function switchFixTimeScene(sceneName) {
+  if (!fixTimeSceneNames[sceneName]) return;
+  
+  currentFixTimeScene = sceneName;
+  updateAllFixTimeVideos();
+  
+  const fixtimeSceneButtons = document.querySelectorAll('.scene-btn[data-scene]');
+  fixtimeSceneButtons.forEach(btn => {
+    if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes('switchFixTimeScene')) {
+      if (btn.getAttribute('data-scene') === sceneName) {
+        btn.classList.add('is-primary');
+        btn.classList.remove('is-light');
+      } else {
+        btn.classList.remove('is-primary');
+        btn.classList.add('is-light');
+      }
+    }
+  });
+}
+
+// Comparison video functionality
+let currentComparisonScene = 'Laboratory';
+
+// Comparison scene names mapping
+const comparisonSceneNames = {
+  'Laboratory': 'Laboratory Scene',
+  'Streetlight': 'Streetlight Scene',
+  'Tree': 'Tree Scene',
+  'Students_2': 'Students Scene',
+  'Walk': 'Walk Scene',
+  'Wall': 'Wall Scene'
+};
+
+// Comparison video types and their corresponding IDs
+const comparisonVideoMappings = [
+  { file: 'DeepHDRVideo', id: 'DeepHDRVideo' },
+  { file: 'LANHDR', id: 'LANHDR' },
+  { file: 'HDRFlow', id: 'HDRFlow' },
+  { file: 'Ours', id: 'Ours' }
+];
+
+// Update all comparison videos for the current scene
+function updateAllComparisonVideos() {
+  comparisonVideoMappings.forEach(mapping => {
+    const videoPath = `./static/comparison_videos/realdataset/${currentComparisonScene}/${mapping.file}.mp4`;
+    const videoElement = document.getElementById(`comparison-video-${mapping.id}`);
+    const videoSource = document.getElementById(`comparison-source-${mapping.id}`);
+    
+    if (videoSource && videoElement) {
+      videoSource.src = videoPath;
+      videoElement.load(); // Reload the video with new source
+    }
+  });
+}
+
+// Switch comparison scene function
+function switchComparisonScene(sceneName) {
+  if (!comparisonSceneNames[sceneName]) return;
+  
+  currentComparisonScene = sceneName;
+  updateAllComparisonVideos();
+  
+  // Update comparison scene button states
+  const comparisonSceneButtons = document.querySelectorAll('.scene-btn[data-scene]');
+  comparisonSceneButtons.forEach(btn => {
+    if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes('switchComparisonScene')) {
+      if (btn.getAttribute('data-scene') === sceneName) {
+        btn.classList.add('is-primary');
+        btn.classList.remove('is-light');
+      } else {
+        btn.classList.remove('is-primary');
+        btn.classList.add('is-light');
+      }
+    }
+  });
+}
+</script>
+
+
+
+
+</body>
+</html>
